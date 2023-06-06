@@ -179,13 +179,33 @@ const updateUI = function (acc) {
   calcDisplaySummary(acc);
 };
 
+const startLogoutTimer = function () {
+  const tick = () => {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+    labelTimer.textContent = `${min} : ${sec}`;
+
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Login to get started';
+      containerApp.style.opacity = 0;
+    }
+
+    time = time - 1;
+  };
+  let time = 120;
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
 ///////////////////////////////////////
 // Event handlers
-let currentAccount;
-// FAKE ALWAYS LOG IN
-currentAccount = account1;
-updateUI(currentAccount);
-containerApp.style.opacity = 100;
+let currentAccount, timer;
+// // FAKE ALWAYS LOG IN
+// currentAccount = account1;
+// updateUI(currentAccount);
+// containerApp.style.opacity = 100;
 
 btnLogin.addEventListener('click', function (e) {
   // Prevent form from submitting
@@ -228,8 +248,14 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
 
+    if (timer) clearInterval(timer);
+    timer = startLogoutTimer();
+
     // Update UI
     updateUI(currentAccount);
+    //reset the timer
+    clearInterval(timer);
+    timer = startLogoutTimer();
   }
 });
 
@@ -265,11 +291,18 @@ btnLoan.addEventListener('click', function (e) {
 
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
     // Add movement
-    currentAccount.movements.push(amount);
-    // add loan date
-    currentAccount.movementsDates.push(new Date().toISOString());
-    // Update UI
-    updateUI(currentAccount);
+    setTimeout(function () {
+      currentAccount.movements.push(amount);
+      // add loan date
+      currentAccount.movementsDates.push(new Date().toISOString());
+      // Update UI
+      updateUI(currentAccount);
+
+      //reset timer
+
+      clearInterval(timer);
+      timer = startLogoutTimer();
+    }, 2500);
   }
   inputLoanAmount.value = '';
 });
@@ -397,13 +430,34 @@ btnSort.addEventListener('click', function (e) {
 
 /// INTL numbers
 
-const num = 3884764.23;
-const options = {
-  style: 'unit',
-  unit: 'mile-per-hour',
-  currency: 'EUR',
-  useGrouping: false,
-};
-console.log(new Intl.NumberFormat('en-US', options).format(num));
-console.log(new Intl.NumberFormat('de-DE', options).format(num));
-console.log(new Intl.NumberFormat('ar-SY', options).format(num));
+// const num = 3884764.23;
+// const options = {
+//   style: 'unit',
+//   unit: 'mile-per-hour',
+//   currency: 'EUR',
+//   useGrouping: false,
+// };
+// console.log(new Intl.NumberFormat('en-US', options).format(num));
+// console.log(new Intl.NumberFormat('de-DE', options).format(num));
+// console.log(new Intl.NumberFormat('ar-SY', options).format(num));
+
+// TIMERS
+//SETTIMEOUT
+const ingridients = ['olives', 'spinach'];
+
+const pizzaTimer = setTimeout(
+  (ing1, ing2) => {
+    console.log(`Here is your pizza 🍕 with ${ing1} and ${ing2}`);
+  },
+  3000,
+  ...ingridients
+);
+
+if (ingridients.includes('spinach')) clearTimeout(pizzaTimer);
+
+//SETINTERVAL
+
+setInterval(() => {
+  const now = new Date();
+  // console.log(now);
+}, 1000);
